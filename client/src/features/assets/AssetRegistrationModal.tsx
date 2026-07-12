@@ -12,11 +12,11 @@ import { apiClient } from '../../api/client';
 
 const assetSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  description: z.string().optional(),
+  description: z.string().default(''),
   categoryId: z.string().min(1, 'Category is required'),
-  departmentId: z.string().optional(),
-  serialNumber: z.string().optional(),
-  purchaseCost: z.string().optional(),
+  departmentId: z.string().default(''),
+  serialNumber: z.string().default(''),
+  purchaseCost: z.string().default(''),
   condition: z.string().default('NEW'),
 });
 
@@ -31,7 +31,7 @@ export const AssetRegistrationModal = ({ open, onOpenChange }: AssetRegistration
   const queryClient = useQueryClient();
   
   const form = useForm<AssetFormValues>({
-    resolver: zodResolver(assetSchema),
+    resolver: zodResolver(assetSchema) as any,
     defaultValues: {
       name: '',
       description: '',
@@ -93,10 +93,10 @@ export const AssetRegistrationModal = ({ open, onOpenChange }: AssetRegistration
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
+          <form onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-4 mt-4">
             <div className="grid grid-cols-1 gap-4">
               <FormField
-                control={form.control}
+                control={form.control as any}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
@@ -111,7 +111,7 @@ export const AssetRegistrationModal = ({ open, onOpenChange }: AssetRegistration
             </div>
 
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="description"
               render={({ field }) => (
                 <FormItem>
@@ -126,7 +126,7 @@ export const AssetRegistrationModal = ({ open, onOpenChange }: AssetRegistration
 
             <div className="grid grid-cols-2 gap-4">
               <FormField
-                control={form.control}
+                control={form.control as any}
                 name="categoryId"
                 render={({ field }) => (
                   <FormItem>
@@ -150,7 +150,7 @@ export const AssetRegistrationModal = ({ open, onOpenChange }: AssetRegistration
                 )}
               />
               <FormField
-                control={form.control}
+                control={form.control as any}
                 name="departmentId"
                 render={({ field }) => (
                   <FormItem>
@@ -178,7 +178,7 @@ export const AssetRegistrationModal = ({ open, onOpenChange }: AssetRegistration
 
             <div className="grid grid-cols-2 gap-4">
               <FormField
-                control={form.control}
+                control={form.control as any}
                 name="serialNumber"
                 render={({ field }) => (
                   <FormItem>
@@ -191,7 +191,7 @@ export const AssetRegistrationModal = ({ open, onOpenChange }: AssetRegistration
                 )}
               />
               <FormField
-                control={form.control}
+                control={form.control as any}
                 name="purchaseCost"
                 render={({ field }) => (
                   <FormItem>
