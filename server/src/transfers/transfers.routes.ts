@@ -1,22 +1,58 @@
 import { Router } from 'express';
+import { transfersController } from './transfers.controller';
 import { authenticate } from '../middleware/auth.middleware';
-import { sendSuccess } from '../shared/utils/response';
+import { authorize } from '../middleware/rbac.middleware';
+import { validate } from '../middleware/validate.middleware';
+import {
+  createTransferSchema,
+  approveTransferSchema,
+  rejectTransferSchema,
+  transferFilterSchema,
+} from './transfers.schemas';
+import { idParamSchema } from '../shared/schemas';
 
 const router = Router();
 
 router.use(authenticate);
 
-// Placeholder routes — will be fully implemented in Phase 8
-router.post('/', (_req, res) => {
-  sendSuccess(res, null, 'Transfer requests module — coming in Phase 8');
-});
+router.post(
+  '/',
+  authorize('ADMIN', 'ASSET_MANAGER', 'DEPARTMENT_HEAD', 'EMPLOYEE'),
+  validate({ body: createTransferSchema }),
+  transfersController.requestTransfer.bind(transfersController)
+);
 
-router.get('/', (_req, res) => {
-  sendSuccess(res, [], 'Transfer requests list — coming in Phase 8');
-});
+router.get(
+  '/',
+  validate({ query: transferFilterSchema }),
+  transfersController.getAll.bind(transfersController)
+);
 
-router.patch('/:id/approve', (_req, res) => {
-  sendSuccess(res, null, 'Approve transfer — coming in Phase 8');
-});
+router.get(
+  '/:id',
+  validate({ params: idParamSchema }),
+  transfersController.getById.bind(transfersController)
+);
+
+router.patch(
+  '/:id/approve-dept',
+  authorize('ADMIN', 'ASSET_MANAGER', 'DEPARTMENT_HEAD'),
+  validate({ params: idParamSchema, body: approveTransferSchema }),
+  transfersController.approveDeptHead.bind(transfersController)
+);
+
+router.patch(
+  '/:id/approve-manager',
+  authorize('ADMIN', 'ASSET_MANAGER'),
+  validate({ params: idParamSchema, body: approveTransferSchema }),
+  transfersController.approveManager.bind(transfersController)
+);
+
+router.patch(
+  '/:id/reject',
+  authorize('ADMIN', 'ASSET_MANAGER', 'DEPARTMENT_HEAD'),
+  validate({ params: idParamSchema, body: rejectTransferSchema }),
+  transfersController.reject.bind(transfersController)
+);
 
 export default router;
