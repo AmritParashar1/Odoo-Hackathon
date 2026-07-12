@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSocket } from '../../contexts/SocketContext';
@@ -14,7 +14,9 @@ import {
   Bell,
   LogOut,
   Menu,
-  Building2
+  Building2,
+  Moon,
+  Sun
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -24,6 +26,22 @@ export const DashboardLayout = () => {
   const { user, logout } = useAuth();
   const { unreadCount } = useSocket();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return localStorage.getItem('theme') === 'dark' || 
+           (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  });
+
+  const toggleTheme = () => {
+    const newTheme = !isDarkMode;
+    setIsDarkMode(newTheme);
+    if (newTheme) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  };
 
   const isAdminOrManager = user?.role === 'ADMIN' || user?.role === 'ASSET_MANAGER';
 
@@ -44,6 +62,14 @@ export const DashboardLayout = () => {
   const getInitials = (first: string, last: string) => {
     return `${first.charAt(0)}${last.charAt(0)}`.toUpperCase();
   };
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -106,6 +132,10 @@ export const DashboardLayout = () => {
           </div>
 
           <div className="flex items-center gap-4 ml-auto">
+            <Button variant="outline" size="icon" className="rounded-full border-border" onClick={toggleTheme}>
+              {isDarkMode ? <Sun className="w-5 h-5 text-muted-foreground" /> : <Moon className="w-5 h-5 text-muted-foreground" />}
+            </Button>
+
             <Button variant="outline" size="icon" className="relative rounded-full border-border">
               <Bell className="w-5 h-5 text-muted-foreground" />
               {unreadCount > 0 && (

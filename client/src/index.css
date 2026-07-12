@@ -10,14 +10,14 @@
 
     /* Page background: warm parchment cream */
     --background: 36 50% 96%;
-    --foreground: 20 30% 18%;
+    --foreground: 0 0% 5%; /* Made more black */
 
     /* Cards: soft warm white */
     --card: 38 60% 98%;
-    --card-foreground: 20 30% 18%;
+    --card-foreground: 0 0% 5%; /* Made more black */
 
     --popover: 38 60% 98%;
-    --popover-foreground: 20 30% 18%;
+    --popover-foreground: 0 0% 5%; /* Made more black */
 
     /* Primary: rich amber/burnt orange */
     --primary: 28 90% 48%;
@@ -25,23 +25,23 @@
 
     /* Secondary: warm sandy beige */
     --secondary: 34 40% 90%;
-    --secondary-foreground: 20 30% 25%;
+    --secondary-foreground: 0 0% 10%; /* Made more black */
 
     /* Muted: soft warm grey */
     --muted: 34 30% 92%;
-    --muted-foreground: 25 20% 48%;
+    --muted-foreground: 20 10% 30%; /* Darker for better visibility */
 
     /* Accent: golden harvest */
     --accent: 40 80% 88%;
-    --accent-foreground: 20 30% 20%;
+    --accent-foreground: 0 0% 5%; /* Made more black */
 
     /* Destructive: deep rust red */
     --destructive: 5 72% 52%;
     --destructive-foreground: 36 100% 97%;
 
     /* Borders & inputs: warm tan */
-    --border: 30 30% 84%;
-    --input: 30 30% 84%;
+    --border: 30 30% 74%;
+    --input: 30 30% 74%;
     --ring: 28 90% 48%;
 
     --radius: 0.75rem;
@@ -90,8 +90,8 @@
 
 /* Glassmorphism Utilities — warm autumn edition */
 .glass {
-  @apply bg-background/75 backdrop-blur-md border border-amber-200/40 shadow-lg;
+  @apply bg-background/75 backdrop-blur-md border border-amber-200/40 dark:border-amber-900/40 shadow-lg;
 }
 .glass-panel {
-  @apply bg-amber-50/60 backdrop-blur-xl border border-amber-200/50 shadow-2xl;
+  @apply bg-amber-50/60 dark:bg-black/30 backdrop-blur-xl border border-amber-200/50 dark:border-amber-900/50 shadow-2xl;
 }
