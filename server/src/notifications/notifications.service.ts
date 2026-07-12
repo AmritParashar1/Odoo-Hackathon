@@ -1,36 +1,51 @@
-import prisma from '../config/database';
-import logger from '../shared/utils/logger';
+import { notificationsRepository } from './notifications.repository';
+import { NotificationFilterInput } from './notifications.schemas';
+import { getIO } from './socket';
 
-interface CreateNotificationInput {
-  userId: string;
-  title: string;
-  message: string;
-  type: string;
-  entityType?: string;
-  entityId?: string;
-}
+export class NotificationsService {
+  async notifyUser(userId: string, title: string, message: string, type: string, entityType?: string, entityId?: string) {
+    // 1. Persist to DB
+    const notification = await notificationsRepository.create({
+      userId,
+      title,
+      message,
+      type,
+      entityType,
+      entityId,
+    });
 
-/**
- * Notification service — creates in-app notifications.
- * Socket.io integration will be added in Phase 13.
- */
-export class NotificationService {
-  async create(input: CreateNotificationInput) {
-    const notification = await prisma.notification.create({ data: input });
-    logger.info(`Notification sent to user ${input.userId}: ${input.title}`);
-    // TODO: Phase 13 — emit via Socket.io
+    // 2. Emit real-time event
+    try {
+      getIO().to(`user:${userId}`).emit('new_notification', notification);
+    } catch (e) {
+      // Socket might not be initialized during certain CLI scripts, ignore silently
+    }
+
     return notification;
   }
 
-  async createBulk(inputs: CreateNotificationInput[]) {
-    return prisma.notification.createMany({ data: inputs });
+  async notifyRole(role: string, title: string, message: string, type: string, entityType?: string, entityId?: string) {
+    // Note: To persist this to DB, we'd need to fetch all users with this role.
+    // For large systems, it's better to just emit the socket event and let clients fetch on reload.
+    // However, for this MVP we'll just emit the socket event.
+    try {
+      getIO().to(`role:${role}`).emit('new_notification', {
+        title, message, type, entityType, entityId, createdAt: new Date()
+      });
+    } catch (e) {}
   }
 
-  async getUnreadCount(userId: string): Promise<number> {
-    return prisma.notification.count({
-      where: { userId, isRead: false },
-    });
+  async getUserNotifications(userId: string, filters: NotificationFilterInput) {
+    return notificationsRepository.findAll(userId, filters);
+  }
+
+  async markAsRead(id: string, userId: string) {
+    return notificationsRepository.markAsRead(id, userId);
+  }
+
+  async markAllAsRead(userId: string) {
+    return notificationsRepository.markAllAsRead(userId);
   }
 }
 
-export const notificationService = new NotificationService();
+export const notificationsService = new NotificationsService();

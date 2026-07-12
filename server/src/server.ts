@@ -3,6 +3,7 @@ import app from './app';
 import { env } from './config/env';
 import logger from './shared/utils/logger';
 import prisma from './config/database';
+import { initSocket } from './notifications/socket';
 
 async function main() {
   try {
@@ -17,6 +18,10 @@ async function main() {
       logger.info(`🔗 Health check: http://localhost:${env.PORT}/health`);
       logger.info(`📡 API base: http://localhost:${env.PORT}/api/v1`);
     });
+
+    // Initialize Socket.io
+    initSocket(server);
+    logger.info('🔌 Socket.io server initialized');
 
     // Graceful shutdown
     const gracefulShutdown = async (signal: string) => {
