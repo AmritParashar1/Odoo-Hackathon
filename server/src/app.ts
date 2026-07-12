@@ -63,6 +63,10 @@ app.use(httpLogger);
 
 const API_PREFIX = '/api/v1';
 
+app.get(API_PREFIX, (_req, res) => {
+  res.json({ success: true, message: 'Welcome to AssetFlow API v1' });
+});
+
 app.use(`${API_PREFIX}/auth`, authRoutes);
 app.use(`${API_PREFIX}/users`, userRoutes);
 app.use(`${API_PREFIX}/departments`, departmentRoutes);

@@ -154,7 +154,7 @@ export class AssetsRepository {
    */
   async generateAssetTag(): Promise<string> {
     const lastAsset = await prisma.asset.findFirst({
-      orderBy: { createdAt: 'desc' },
+      orderBy: { assetTag: 'desc' },
       select: { assetTag: true },
     });
 

@@ -55,13 +55,15 @@ export class AssetsService {
     // Generate asset tag
     const assetTag = await assetsRepository.generateAssetTag();
 
+    const { categoryId, departmentId, ...rest } = data;
+
     return assetsRepository.create({
-      ...data,
+      ...rest,
       assetTag,
       purchaseDate: data.purchaseDate ? new Date(data.purchaseDate) : undefined,
       warrantyExpiry: data.warrantyExpiry ? new Date(data.warrantyExpiry) : undefined,
-      category: { connect: { id: data.categoryId } },
-      department: data.departmentId ? { connect: { id: data.departmentId } } : undefined,
+      category: { connect: { id: categoryId } },
+      department: departmentId ? { connect: { id: departmentId } } : undefined,
     } as any);
   }
 
