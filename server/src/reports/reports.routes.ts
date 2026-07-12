@@ -1,51 +1,24 @@
 import { Router } from 'express';
+import { reportsController } from './reports.controller';
 import { authenticate } from '../middleware/auth.middleware';
 import { authorize } from '../middleware/rbac.middleware';
-import { sendSuccess } from '../shared/utils/response';
+import { validate } from '../middleware/validate.middleware';
+import { dashboardFilterSchema } from './reports.schemas';
 
 const router = Router();
 
 router.use(authenticate);
+router.use(authorize('ADMIN', 'ASSET_MANAGER', 'DEPARTMENT_HEAD'));
 
-// Placeholder — will be fully implemented in Phase 12
 router.get(
-  '/asset-utilization',
-  authorize('ADMIN', 'ASSET_MANAGER'),
-  (_req, res) => {
-    sendSuccess(res, null, 'Asset utilization report — coming in Phase 12');
-  }
+  '/dashboard',
+  validate({ query: dashboardFilterSchema }),
+  reportsController.getDashboard.bind(reportsController)
 );
 
 router.get(
-  '/department-summary',
-  authorize('ADMIN', 'ASSET_MANAGER'),
-  (_req, res) => {
-    sendSuccess(res, null, 'Department summary report — coming in Phase 12');
-  }
-);
-
-router.get(
-  '/maintenance',
-  authorize('ADMIN', 'ASSET_MANAGER'),
-  (_req, res) => {
-    sendSuccess(res, null, 'Maintenance report — coming in Phase 12');
-  }
-);
-
-router.get(
-  '/bookings',
-  authorize('ADMIN', 'ASSET_MANAGER'),
-  (_req, res) => {
-    sendSuccess(res, null, 'Booking report — coming in Phase 12');
-  }
-);
-
-router.get(
-  '/idle-assets',
-  authorize('ADMIN', 'ASSET_MANAGER'),
-  (_req, res) => {
-    sendSuccess(res, null, 'Idle assets report — coming in Phase 12');
-  }
+  '/lifecycle',
+  reportsController.getLifecycleReport.bind(reportsController)
 );
 
 export default router;
