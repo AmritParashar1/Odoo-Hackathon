@@ -19,7 +19,7 @@ router.use(authenticate);
 
 router.post(
   '/categories',
-  authorize('ADMIN'),
+  authorize('ADMIN', 'ASSET_MANAGER'),
   validate({ body: createCategorySchema }),
   assetsController.createCategory
 );
@@ -34,14 +34,14 @@ router.get(
 
 router.patch(
   '/categories/:id',
-  authorize('ADMIN'),
+  authorize('ADMIN', 'ASSET_MANAGER'),
   validate({ params: idParamSchema, body: updateCategorySchema }),
   assetsController.updateCategory
 );
 
 router.delete(
   '/categories/:id',
-  authorize('ADMIN'),
+  authorize('ADMIN', 'ASSET_MANAGER'),
   validate({ params: idParamSchema }),
   assetsController.deleteCategory
 );
@@ -80,7 +80,7 @@ router.patch(
 
 router.delete(
   '/:id',
-  authorize('ADMIN'),
+  authorize('ADMIN', 'ASSET_MANAGER'),
   validate({ params: idParamSchema }),
   assetsController.delete
 );

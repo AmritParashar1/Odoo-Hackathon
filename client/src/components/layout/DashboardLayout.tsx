@@ -24,7 +24,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 
 export const DashboardLayout = () => {
   const { user, logout } = useAuth();
-  const { unreadCount } = useSocket();
+  const { unreadCount, notifications, markAsRead, markAllAsRead } = useSocket();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return localStorage.getItem('theme') === 'dark' || 
@@ -136,12 +136,54 @@ export const DashboardLayout = () => {
               {isDarkMode ? <Sun className="w-5 h-5 text-muted-foreground" /> : <Moon className="w-5 h-5 text-muted-foreground" />}
             </Button>
 
-            <Button variant="outline" size="icon" className="relative rounded-full border-border">
-              <Bell className="w-5 h-5 text-muted-foreground" />
-              {unreadCount > 0 && (
-                <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-destructive rounded-full border-2 border-background"></span>
-              )}
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" className="relative rounded-full border-border">
+                  <Bell className="w-5 h-5 text-muted-foreground" />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-destructive rounded-full border-2 border-background"></span>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-80" align="end" forceMount>
+                <div className="p-3 border-b border-border flex items-center justify-between">
+                  <p className="font-semibold text-sm">Notifications</p>
+                  {unreadCount > 0 && (
+                    <Button variant="ghost" size="sm" className="h-auto px-2 py-1 text-xs" onClick={() => markAllAsRead()}>
+                      Mark all as read
+                    </Button>
+                  )}
+                </div>
+                <div className="max-h-80 overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <div className="p-6 text-center text-sm text-muted-foreground">
+                      No new notifications
+                    </div>
+                  ) : (
+                    notifications.map((notification) => (
+                      <DropdownMenuItem 
+                        key={notification.id} 
+                        className={`p-3 cursor-pointer border-b border-border/50 last:border-0 flex flex-col items-start gap-1 ${!notification.isRead ? 'bg-primary/5' : ''}`}
+                        onClick={() => {
+                          if (!notification.isRead) {
+                            markAsRead(notification.id);
+                          }
+                        }}
+                      >
+                        <div className="flex items-start justify-between w-full">
+                          <p className="text-sm font-medium">{notification.title}</p>
+                          {!notification.isRead && <span className="w-2 h-2 rounded-full bg-primary mt-1 flex-shrink-0" />}
+                        </div>
+                        <p className="text-xs text-muted-foreground line-clamp-2">{notification.message}</p>
+                        <p className="text-[10px] text-muted-foreground/70 mt-1">
+                          {new Date(notification.createdAt).toLocaleString()}
+                        </p>
+                      </DropdownMenuItem>
+                    ))
+                  )}
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

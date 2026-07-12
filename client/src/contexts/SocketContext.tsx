@@ -1,12 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from './AuthContext';
+import { apiClient } from '../api/client';
 
 type SocketContextType = {
   socket: Socket | null;
   notifications: any[];
-  markAsRead: (id: string) => void;
-  markAllAsRead: () => void;
+  markAsRead: (id: string) => Promise<void>;
+  markAllAsRead: () => Promise<void>;
   unreadCount: number;
 };
 
@@ -16,6 +17,17 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [notifications, setNotifications] = useState<any[]>([]);
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await apiClient.get('/notifications');
+      if (response.data?.data) {
+        setNotifications(response.data.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch notifications:', error);
+    }
+  };
 
   useEffect(() => {
     if (!user) {
@@ -29,8 +41,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     const token = localStorage.getItem('accessToken');
     if (!token) return;
 
-    // Use empty string to connect to the same origin since we proxy /socket.io in dev,
-    // or point directly to backend if running standalone.
+    fetchNotifications();
+
     const newSocket = io(window.location.origin, {
       auth: { token },
       path: '/socket.io',
@@ -52,12 +64,22 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, [user]);
 
-  const markAsRead = (id: string) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+  const markAsRead = async (id: string) => {
+    try {
+      await apiClient.patch(`/notifications/${id}/read`);
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+    } catch (error) {
+      console.error('Failed to mark as read:', error);
+    }
   };
 
-  const markAllAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+  const markAllAsRead = async () => {
+    try {
+      await apiClient.patch('/notifications/read-all');
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    } catch (error) {
+      console.error('Failed to mark all as read:', error);
+    }
   };
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
