@@ -29,7 +29,9 @@ apiClient.interceptors.response.use(
       } catch (err) {
         // Refresh token expired or invalid, log out user
         localStorage.removeItem('accessToken');
-        window.location.href = '/login';
+        if (window.location.pathname !== '/login' && window.location.pathname !== '/signup') {
+          window.location.href = '/login';
+        }
         return Promise.reject(err);
       }
     }

@@ -25,14 +25,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem('accessToken');
-      if (token) {
-        try {
-          const { data } = await apiClient.get('/auth/me');
-          setUser(data.data);
-        } catch (error) {
-          localStorage.removeItem('accessToken');
-        }
+      try {
+        const { data } = await apiClient.get('/auth/profile');
+        setUser(data.data);
+      } catch (error) {
+        localStorage.removeItem('accessToken');
       }
       setIsLoading(false);
     };
