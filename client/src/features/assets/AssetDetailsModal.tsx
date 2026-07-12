@@ -7,9 +7,11 @@ interface AssetDetailsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   asset: any | null;
+  onDelete?: (id: string) => void;
+  userRole?: string;
 }
 
-export const AssetDetailsModal = ({ open, onOpenChange, asset }: AssetDetailsModalProps) => {
+export const AssetDetailsModal = ({ open, onOpenChange, asset, onDelete, userRole }: AssetDetailsModalProps) => {
   if (!asset) return null;
 
   const getStatusColor = (status: string) => {
@@ -137,11 +139,29 @@ export const AssetDetailsModal = ({ open, onOpenChange, asset }: AssetDetailsMod
         </div>
 
         {/* Footer Actions */}
-        <div className="bg-secondary/30 p-4 border-t border-border/50 flex justify-end gap-3">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
-          <Button variant="default" className="bg-primary hover:bg-primary/90">
-            Edit Asset
-          </Button>
+        <div className="bg-secondary/30 p-4 border-t border-border/50 flex justify-between gap-3">
+          <div>
+            {userRole === 'ADMIN' && (
+              <Button 
+                variant="destructive" 
+                className="bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                onClick={() => {
+                  if (window.confirm('Are you sure you want to permanently delete this asset and ALL its history?')) {
+                    onDelete?.(asset.id);
+                    onOpenChange(false);
+                  }
+                }}
+              >
+                Delete Asset
+              </Button>
+            )}
+          </div>
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
+            <Button variant="default" className="bg-primary hover:bg-primary/90">
+              Edit Asset
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

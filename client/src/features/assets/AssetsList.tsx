@@ -1,17 +1,32 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../../api/client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
-import { Box, Plus, Search } from 'lucide-react';
+import { Box, Plus, Search, Trash2 } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 import { AssetRegistrationModal } from './AssetRegistrationModal';
 import { AssetDetailsModal } from './AssetDetailsModal';
 
 export const AssetsList = () => {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState<any | null>(null);
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiClient.delete(`/assets/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['assets'] });
+    },
+    onError: (err: any) => {
+      alert(err.response?.data?.message || 'Failed to delete asset');
+    }
+  });
 
   // Debounce search input
   useEffect(() => {
@@ -117,7 +132,7 @@ export const AssetsList = () => {
                       <td className="px-6 py-4 text-muted-foreground capitalize">
                         {asset.condition.toLowerCase()}
                       </td>
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
                         <Button 
                           variant="ghost" 
                           size="sm" 
@@ -129,6 +144,21 @@ export const AssetsList = () => {
                         >
                           View Details
                         </Button>
+                        {user?.role === 'ADMIN' && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (window.confirm('Are you sure you want to permanently delete this asset and ALL its history?')) {
+                                deleteMutation.mutate(asset.id);
+                              }
+                            }}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        )}
                       </td>
                     </tr>
                   ))
@@ -147,7 +177,9 @@ export const AssetsList = () => {
       <AssetDetailsModal 
         open={!!selectedAsset} 
         onOpenChange={(open) => !open && setSelectedAsset(null)} 
-        asset={selectedAsset} 
+        asset={selectedAsset}
+        onDelete={(id) => deleteMutation.mutate(id)}
+        userRole={user?.role}
       />
     </div>
   );

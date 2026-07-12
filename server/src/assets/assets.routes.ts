@@ -78,4 +78,11 @@ router.patch(
   assetsController.update
 );
 
+router.delete(
+  '/:id',
+  authorize('ADMIN'),
+  validate({ params: idParamSchema }),
+  assetsController.delete
+);
+
 export default router;

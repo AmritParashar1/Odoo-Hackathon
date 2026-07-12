@@ -131,6 +131,17 @@ export class AssetsRepository {
     return prisma.asset.update({ where: { id }, data: { status } });
   }
 
+  async deleteAsset(id: string) {
+    return prisma.$transaction([
+      prisma.allocation.deleteMany({ where: { assetId: id } }),
+      prisma.transferRequest.deleteMany({ where: { assetId: id } }),
+      prisma.booking.deleteMany({ where: { assetId: id } }),
+      prisma.maintenanceRequest.deleteMany({ where: { assetId: id } }),
+      prisma.auditEntry.deleteMany({ where: { assetId: id } }),
+      prisma.asset.delete({ where: { id } }),
+    ]);
+  }
+
   async findByAssetTag(assetTag: string) {
     return prisma.asset.findUnique({ where: { assetTag } });
   }

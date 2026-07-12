@@ -94,6 +94,15 @@ export class AssetsController {
     }
   }
 
+  async delete(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      await assetsService.delete(req.params.id as string);
+      sendSuccess(res, null, 'Asset deleted completely');
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async getStatusCounts(_req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const counts = await assetsService.getStatusCounts();

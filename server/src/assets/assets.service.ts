@@ -99,6 +99,12 @@ export class AssetsService {
     return assetsRepository.update(id, updateData);
   }
 
+  async delete(id: string) {
+    const asset = await assetsRepository.findById(id);
+    if (!asset) throw new NotFoundError('Asset not found');
+    return assetsRepository.deleteAsset(id);
+  }
+
   async getStatusCounts() {
     return assetsRepository.countByStatus();
   }
